@@ -1,0 +1,13 @@
+[package]
+name = "localvid"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.6.1", features = ["derive"] }
+directories = "6.0.0"
+notify-rust = "4.16.0"
+serde_json = "1.0.149"
+srv3-ttml = { git = "https://github.com/FyraLabs/yttml", package = "srv3-ttml" }
+srv3tovtt-crate = { git = "https://github.com/FyraLabs/yttml", package = "srv3tovtt-crate" }
+urlquerystring = "0.1.1"

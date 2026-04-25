@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=LocalVid
+Exec=localvid %u
+Type=Application
+Terminal=false
+MimeType=x-scheme-handler/localvid;
+NoDisplay=true

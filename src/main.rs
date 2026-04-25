@@ -99,7 +99,7 @@ fn fetch_convert_subs(
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
-    register_scheme();
+    register_scheme()?;
     match cli.command {
         Some(Commands::Init) => {
             if let Err(e) = setup_desktop_entry() {
@@ -154,11 +154,27 @@ fn video(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn register_scheme() {
+fn register_scheme() -> std::io::Result<()> {
+    let base_dirs = BaseDirs::new().ok_or_else(|| {
+        std::io::Error::new(std::io::ErrorKind::NotFound, "Home directory not found")
+    })?;
+
+    let mut app_dir = base_dirs.data_local_dir().to_path_buf();
+    app_dir.push("applications");
+
+    fs::create_dir_all(&app_dir)?;
+
     Command::new("xdg-mime")
         .args(["default", "localvid.desktop", "x-scheme-handler/localvid"])
         .output()
         .expect("failed to set url handler");
+
+    Command::new("update-desktop-database")
+        .arg(app_dir)
+        .output()
+        .expect("Failed to update desktop database");
+
+    Ok(())
 }
 
 fn setup_desktop_entry() -> std::io::Result<()> {
@@ -173,15 +189,13 @@ fn setup_desktop_entry() -> std::io::Result<()> {
 
     let desktop_file_path = app_dir.join("localvid.desktop");
 
-    if !desktop_file_path.exists() {
-        let current_exe = env::current_exe()?;
-        let exe_str = current_exe.to_str().unwrap_or("");
+    let current_exe = env::current_exe()?;
+    let exe_str = current_exe.to_str().unwrap_or("");
 
-        let content = DESKTOP_TEMPLATE.replace("EXEC_PATH", exe_str);
+    let content = DESKTOP_TEMPLATE.replace("EXEC_PATH", exe_str);
 
-        fs::write(desktop_file_path, content)?;
-        println!("Successfully installed desktop entry.");
-    }
+    fs::write(desktop_file_path, content)?;
+    println!("Successfully installed desktop entry.");
 
     Ok(())
 }
